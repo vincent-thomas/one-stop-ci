@@ -23,7 +23,7 @@ commands:
           key: yarn-cache-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
-          command: pnpm install
+          command: yarn install
       - save_cache:
           key: yarn-cache-{{ checksum "yarn.lock" }}
           paths:
@@ -32,7 +32,7 @@ commands:
     steps:
       - run:
           name: Run Builds
-          command: yarn build --no-lint
+          command: yarn build
 jobs:
   build_job:
     environment:
@@ -50,4 +50,4 @@ workflows:
       - build_job:
           filters:
             branches:
-              ignore: main
+              only: main
