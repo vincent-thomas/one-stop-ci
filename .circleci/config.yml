@@ -1,0 +1,53 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+
+executors:
+  node_small:
+    <<: *defaults
+    docker:
+      - image: cimg/node:16.13.1
+    resource_class: small
+
+  node_medium:
+    <<: *defaults
+    docker:
+      - image: cimg/node:16.13.1
+    resource_class: medium
+
+commands:
+  install-deps:
+    steps:
+      - restore_cache:
+          key: yarn-cache-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: pnpm install
+      - save_cache:
+          key: yarn-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - ./.yarn/cache
+  run_build:
+    steps:
+      - run:
+          name: Run Builds
+          command: yarn build --no-lint
+jobs:
+  build_job:
+    environment:
+      HOST: "http://localhost:3000"
+    executor: node_medium
+    steps:
+      - checkout
+      - install-deps
+      - run_build
+
+workflows:
+  version: 2
+  CI:
+    jobs:
+      - build_job:
+          filters:
+            branches:
+              ignore: main
